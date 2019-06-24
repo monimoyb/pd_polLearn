@@ -1,17 +1,18 @@
 %% Training Data Generation for MPC Policy  Learning
 % Monimoy Bujarbaruah 
 % 06/22/2019
+% Run this code and save data before running test code
 
 clc; clear all; close all; 
 %% Generate parameters with known bounds, instead of loading Jongsung data files 
-N_mpc = 3;                                                         % MPC horizon length fixed at 3
+N_mpc = 3;                                                        % MPC horizon length fixed at 3
 input_num           =    1;                                       % Dimension of inputs 
 state_num           =    2;                                       % Dimension of states 
-output_num          =   state_num;                          %  Full state feedback 
+output_num          =   state_num;                                %  Full state feedback 
 %% Arrays for storing NN training data 
-sample_number   = 1e2;                                                  % Uniform samples' count. Training data size
-x_nn_train = nan(state_num, sample_number);                   % Training parameters. Current state
-y_nn_train = nan(N_mpc*(input_num), sample_number);      % Labels. Learning the whole sequence
+sample_number   = 1e2;                                              % Uniform samples' count. Training data size
+x_nn_train = nan(state_num, sample_number);                         % Training parameters. Current state
+y_nn_train = nan(N_mpc*(input_num), sample_number);                 % Labels. Learning the whole sequence
 options = sdpsettings('verbose',0, 'solver', 'gurobi');
 
 %% Define the system matrices. Simple LTI System 
@@ -19,11 +20,11 @@ Ad = [1 0.5; 0 -1];
 Bd = [1; 1];
 %% Weight Matrices for MPC 
 Q = eye(state_num); R = 5*eye(input_num); 
-Qx_vec = kron(eye(N_mpc),Q); Rx_vec = kron(eye(N_mpc),R);  % Append along horizon 
+Qx_vec = kron(eye(N_mpc),Q); Rx_vec = kron(eye(N_mpc),R);           % Append along horizon 
 %% State and input Constraints 
 u_min = -5;
 u_max = 5;
-state_min =  -[10;10];                      % Min state 
+state_min =  -[10;10];                     % Min state 
 state_max =  [10;10];                      % Max state  
 %% Append constraints over horizon. QP with substitution  
 G = [eye(input_num) ; -eye(input_num)];
@@ -45,17 +46,17 @@ opt_val = zeros(sample_number,1);
 
 %% Solve MPC problem and get training data 
 
-ii = 1;                                             % starting loop 
+ii = 1;                                                                  % starting loop 
 
 while ii < sample_number
 
     state01 = state_min(1) + (state_max(1)-state_min(1))*rand(1);
     state02 = state_min(2) + (state_max(2)-state_min(2))*rand(1);
     
-    param0 = [state01;state02];                                                      % Initial state 
+    param0 = [state01;state02];                                          % Initial state 
    
     %% Yalmip QP formulation 
-    x_nn_train(:,ii) = param0;                                                          % Getting features 
+    x_nn_train(:,ii) = param0;                                           % Getting features 
     yalmip clear; yalmip('clear');
 
     % State-Input stacked vectors  
@@ -67,7 +68,7 @@ while ii < sample_number
 
     % Constraints 
     constraints =  [xvec_yp== Ax_vec*param0 + Bx_vec*uvec_yp;
-                    F_vec * xvec_yp <= f_vec;                                                     % state constraints
+                    F_vec * xvec_yp <= f_vec;                                                    % state constraints
                     G_vec*uvec_yp <= g_vec];                                                     % input constraints
                                                 
 
@@ -98,9 +99,9 @@ end
 %% Now Primal Neural Net Train for MPC Policy Learning  
 % https://www.mathworks.com/help/releases/R2016b/nnet/ref/network.html
 
-maxTrials_fixedStructure = 3;                   % max number of fitting trials for given networkSize
+maxTrials_fixedStructure = 3;                         % max number of fitting trials for given networkSize
 maxTrials = 3;                                        % total number of trials of neuron increase            
-net = cell(1,1);                                       % Just one NN defined here 
+net = cell(1,1);                                      % Just one NN defined here 
 
 %% 
 trialNum_AddNeur = 1; 
@@ -110,7 +111,7 @@ net_all = cell(maxTrials_fixedStructure,maxTrials);
 net_perf_all = nan(maxTrials_fixedStructure,maxTrials);
 
 % init network parameters 
-tr_mse = inf;                                                                    % training error; stopping error
+tr_mse = inf;                                                          % training error; stopping error
 networkSize = [0 0];
 tmp = sqrt(sum(y_nn_train.^2,1));                                      % length of indiv training data
 eps_mse = 1e-5*max(tmp);                                               % desired MSE error
@@ -118,14 +119,14 @@ eps_mse = 1e-5*max(tmp);                                               % desired
     %%
     while (tr_mse > eps_mse) && (trialNum_AddNeur <= maxTrials)
 
-        networkSize = networkSize + 2;                                                                            % if passed vector, then multiple layers
+        networkSize = networkSize + 2;                                 % if passed vector, then multiple layers
         disp(['network size: ' , num2str(networkSize)])
 
         trialNum_FixedStruc = 0;
 
         for ii = 1 : maxTrials_fixedStructure                        
 
-            trialNum_FixedStruc = trialNum_FixedStruc+1;                                                    % increase trial number
+            trialNum_FixedStruc = trialNum_FixedStruc+1;               % increase trial number
             disp(['trial number with fixed structure: ' num2str(trialNum_FixedStruc)])
 
 
@@ -143,7 +144,7 @@ eps_mse = 1e-5*max(tmp);                                               % desired
 
             net.trainParam.epochs = 500; 
             % view(net)
-            net = configure(net,x_nn_train,y_nn_train);                                       % configure network (#inputs/output, params, ...)
+            net = configure(net,x_nn_train,y_nn_train);                                    % configure network (#inputs/output, params, ...)
             % view(net)    
             [net  tr] = train(net,x_nn_train,y_nn_train,'useGPU','no');                    % train network
 
@@ -174,7 +175,7 @@ net = net_all{idx1,idx2};                                           % Best Netwo
 
 %% Now Dual Neural Net Train for MPC Policy Learning  
 
-maxTrials_fixedStructureD = 3;                   % max number of fitting trials for given networkSize
+maxTrials_fixedStructureD = 3;                         % max number of fitting trials for given networkSize
 maxTrialsD = 3;                                        % total number of trials of neuron increase         
 net_dual = cell(1,1);                                  % Just one NN defined here 
 
@@ -186,22 +187,22 @@ net_all_dual = cell(maxTrials_fixedStructureD,maxTrialsD);
 net_perf_all_dual = nan(maxTrials_fixedStructureD,maxTrialsD);
 
 % init network parameters 
-tr_mse = inf;                                                                       % training error; stopping error
+tr_mse = inf;                                                            % training error; stopping error
 networkSizeD = [0 0];
-tmp = sqrt(sum(y_nn_train_dual.^2,1));                                  % length of indiv training data
-eps_mse = 1e-5*max(tmp);                                                  % desired MSE error
+tmp = sqrt(sum(y_nn_train_dual.^2,1));                                   % length of indiv training data
+eps_mse = 1e-5*max(tmp);                                                 % desired MSE error
 
     %%
     while (tr_mse > eps_mse) && (trialNum_AddNeurD <= maxTrialsD)
 
-        networkSizeD = networkSizeD + 2;                                                                            % if passed vector, then multiple layers
+        networkSizeD = networkSizeD + 2;                                 % if passed vector, then multiple layers
         disp(['network size: ' , num2str(networkSizeD)])
 
         trialNum_FixedStrucD = 0;
 
         for ii = 1 : maxTrials_fixedStructureD                        
 
-            trialNum_FixedStrucD = trialNum_FixedStrucD+1;                                                    % increase trial number
+            trialNum_FixedStrucD = trialNum_FixedStrucD+1;               % increase trial number
             disp(['trial number with fixed structure: ' num2str(trialNum_FixedStrucD)])
 
 
@@ -219,7 +220,7 @@ eps_mse = 1e-5*max(tmp);                                                  % desi
 
             net_dual.trainParam.epochs = 500; 
             % view(net)
-            net_dual = configure(net_dual,x_nn_train,y_nn_train_dual);                                       % configure network (#inputs/output, params, ...)
+            net_dual = configure(net_dual,x_nn_train,y_nn_train_dual);                                    % configure network (#inputs/output, params, ...)
             % view(net)    
             [net_dual  tr] = train(net_dual,x_nn_train,y_nn_train_dual,'useGPU','no');                    % train network
 
