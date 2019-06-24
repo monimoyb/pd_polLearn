@@ -19,6 +19,7 @@ num_testRuns = 1e2;                                   % Increase this if require
 % Ideally have to pick with log over log formulae
 % beta = 1e-7; 
 % eps =  5e-2;
+% gam_tol = 0.1;                                      % allowable suboptimality
 % num_testRuns = log(1/beta)/log(1/(1-eps));
 
 act_on_GapTest_all = nan(num_testRuns,1); 
@@ -143,6 +144,9 @@ disp(['PD gap rate below 0.5%: ' num2str(sum(rel_pd_GapTest_all(:,1)<0.5/100)/nu
 disp(['PD gap rate below 1%: '   num2str(sum(rel_pd_GapTest_all(:,1)<1/100)/num_testRuns*100) '%'])
 disp(['PD gap rate below 5%: '   num2str(sum(rel_pd_GapTest_all(:,1)<5/100)/num_testRuns*100) '%'])
 disp(['PD gap rate below 10%: '   num2str(sum(rel_pd_GapTest_all(:,1)<10/100)/num_testRuns*100) '%'])
+
+%% 
+% If max. suboptimality level is more than allowable, either try different set of test samples, OR, RETAIN nets.
 
 %% Now plot the contours of the learned policy 
 close all
