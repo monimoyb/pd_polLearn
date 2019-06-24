@@ -7,8 +7,9 @@ clear all; close all; clc;
 %% Loading trained neural nets and all required values 
 load('trainedNNData.mat'); 
 % This loads all required system matrices and parameters too
+
 %% Test the quality of the trained neural networks  
-num_testRuns = 1e2;     
+num_testRuns = 1e2;                                   % Increase this if required
 act_on_GapTest_all = nan(num_testRuns,1); 
 rel_on_GapTest_all = nan(num_testRuns,1); 
 act_pd_GapTest_all = nan(num_testRuns,1); 
@@ -20,7 +21,7 @@ y_nn_test = nan(N_mpc*input_num, num_testRuns);
 
 U_test = nan(N_mpc*(input_num),num_testRuns); 
 options = sdpsettings('verbose',0, 'solver', 'gurobi','gurobi.BarConvTol',1e-8);
-num_infeas = 0;             % number of infeasible random parameters
+num_infeas = 0;                                      % number of infeasible random parameters
 
 %% Main test loop 
 
@@ -47,7 +48,7 @@ while ii <= num_testRuns
 
     % Constraints 
     constraints =  [xvec_yp== Ax_vec*param0 + Bx_vec*uvec_yp;
-                    F_vec * xvec_yp <= f_vec;                                                     % state constraints
+                    F_vec * xvec_yp <= f_vec;                                                    % state constraints
                     G_vec*uvec_yp <= g_vec];                                                     % input constraints
                                                                  
     exitflag = solvesdp(constraints, objective, options);
@@ -84,6 +85,7 @@ while ii <= num_testRuns
         Q_tmp = C_dual*(Q\(C_dual'));
         Q_tmp = 0.5*(Q_tmp+Q_tmp') + 0e-5*eye(N_mpc*(ng+nf));
         
+       % Form dual cost 
        obj_Dual_test = -1/2 * L_test'*Q_tmp*L_test - (C_dual*(Q\c)+d)'*L_test - 1/2*c'*(Q\c) + const; 
        
        act_pd_GapTest_all(ii,1) =  norm(obj_Dual_test-objective_Primal_test);      
