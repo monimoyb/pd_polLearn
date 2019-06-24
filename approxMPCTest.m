@@ -71,7 +71,7 @@ while ii <= num_testRuns
         %% Evaluate primal network    
         uNN = net(param0);
         polfeas = Polyhedron('A',[G_vec; F_vec*Bx_vec],'b',[g_vec; f_vec-F_vec*Ax_vec*param0]);
-        U_test(:,ii) = polyfeas.project(uNN).x;                % Projecting to guarantee feasibility
+        U_test(:,ii) = polfeas.project(uNN).x;                 % Projecting to guarantee feasibility
         
         objective_onMPCTest = double(objective);               % cost of online problem 
 
