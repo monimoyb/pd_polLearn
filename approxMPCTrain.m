@@ -1,7 +1,11 @@
-%% Training Data Generation for MPC Policy  Learning
-% Monimoy Bujarbaruah 
-% 06/22/2019
+%% PD Policy Learning: Training Data Generation for MPC Policy Learning (offline)
+%  Monimoy Bujarbaruah (monimoyb@berkeley.edu)
+%  Xiaojing Zhang (xiaojing.zhang@berkeley.edu)
+%  06/22/2019
 % Run this code and save data before running test code
+%%
+% The paper describing the theory can be found here:
+% 	X. Zhang, M. Bujarbaruah and F. Borrelli; "Safe and Near Optimal Policy Learning for Model Predictive Control using Primal-Dual Neural Networks"; https://arxiv.org/abs/1906.08257]
 
 clc; clear all; close all; 
 %% Generate parameters with known bounds, instead of loading Jongsung data files 
