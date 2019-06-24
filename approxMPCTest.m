@@ -1,7 +1,13 @@
-%% Testing of trained Neural Networks (Offline) 
-% Monimoy Bujarbaruah 
-% 06/22/2019
-% Run code after running training code and saving .mat file 
+%% PD Policy Learning: Testing of trained Neural Networks (Offline) 
+%  Monimoy Bujarbaruah (monimoyb@berkeley.edu)
+%  Xiaojing Zhang (xiaojing.zhang@berkeley.edu)
+%  06/22/2019
+%  Run code after running training code and saving .mat file 
+%%
+% The paper describing the theory can be found here:
+% 	X. Zhang, M. Bujarbaruah and F. Borrelli; "Safe and Near Optimal Policy Learning for Model Predictive Control using Primal-Dual Neural Networks"; https://arxiv.org/abs/1906.08257]
+
+%%
 clear all; close all; clc; 
 
 %% Loading trained neural nets and all required values 
