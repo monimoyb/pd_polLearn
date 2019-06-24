@@ -15,7 +15,7 @@ load('trainedNNData.mat');
 % This loads all required system matrices and parameters too
 
 %% Test the quality of the trained neural networks  
-num_testRuns = 1e2;                                   % Increase this if required
+num_testRuns = 1e2;                                   % Increase this if required. Chosen randomly for now.  
 act_on_GapTest_all = nan(num_testRuns,1); 
 rel_on_GapTest_all = nan(num_testRuns,1); 
 act_pd_GapTest_all = nan(num_testRuns,1); 
