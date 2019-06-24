@@ -1,4 +1,7 @@
 %% Function to append state matrices over horizon 
+%  Monimoy Bujarbaruah
+%  06/22/2019
+%  Form QP with substitution matrices
 
 function [Ax_vec, Bx_vec] = appendMat(N_mpc, nx, nu, A, B)
 
