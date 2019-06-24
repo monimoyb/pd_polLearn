@@ -2,7 +2,7 @@
 %  Monimoy Bujarbaruah (monimoyb@berkeley.edu)
 %  Xiaojing Zhang (xiaojing.zhang@berkeley.edu)
 %  06/22/2019
-%  Run code after running training code and saving .mat file 
+%  Run code after running training code and saving .mat file. If suboptimality is NOT acceptable, retrain!
 %%
 % The paper describing the theory can be found here:
 % 	X. Zhang, M. Bujarbaruah and F. Borrelli; "Safe and Near Optimal Policy Learning for Model Predictive Control using Primal-Dual Neural Networks"; https://arxiv.org/abs/1906.08257]
@@ -16,6 +16,11 @@ load('trainedNNData.mat');
 
 %% Test the quality of the trained neural networks  
 num_testRuns = 1e2;                                   % Increase this if required. Chosen randomly for now.  
+% Ideally have to pick with log over log formulae
+% beta = 1e-7; 
+% eps =  5e-2;
+% num_testRuns = log(1/beta)/log(1/(1-eps));
+
 act_on_GapTest_all = nan(num_testRuns,1); 
 rel_on_GapTest_all = nan(num_testRuns,1); 
 act_pd_GapTest_all = nan(num_testRuns,1); 
@@ -64,7 +69,9 @@ while ii <= num_testRuns
     if exitflag.problem == 0
        
         %% Evaluate primal network    
-        U_test(:,ii) = net(param0);
+        uNN = net(param0);
+        polfeas = Polyhedron('A',[G_vec; F_vec*Bx_vec],'b',[g_vec; f_vec-F_vec*Ax_vec*param0]);
+        U_test(:,ii) = polyfeas.project(uNN).x;                % Projecting to guarantee feasibility
         
         objective_onMPCTest = double(objective);               % cost of online problem 
 
@@ -80,16 +87,16 @@ while ii <= num_testRuns
         
        %% Call the dual network and compute cost 
        L_test = net_dual(param0);
-       L_test = max(L_test,0);
+       L_test = max(L_test,0);                                 % Projecting to guarantee feasibility  
 
        Q = 2*(Bx_vec'*Qx_vec*Bx_vec + Rx_vec);    
        c = (2*param0'*Ax_vec'*Qx_vec*Bx_vec)';     
        const = param0'*Ax_vec'*Qx_vec*Ax_vec*param0; 
         
-        C_dual = [G_vec; F_vec*Bx_vec];
-        d = [g_vec; f_vec - F_vec*Ax_vec*param0];
-        Q_tmp = C_dual*(Q\(C_dual'));
-        Q_tmp = 0.5*(Q_tmp+Q_tmp') + 0e-5*eye(N_mpc*(ng+nf));
+       C_dual = [G_vec; F_vec*Bx_vec];
+       d = [g_vec; f_vec - F_vec*Ax_vec*param0];
+       Q_tmp = C_dual*(Q\(C_dual'));
+       Q_tmp = 0.5*(Q_tmp+Q_tmp') + 0e-5*eye(N_mpc*(ng+nf));
         
        % Form dual cost 
        obj_Dual_test = -1/2 * L_test'*Q_tmp*L_test - (C_dual*(Q\c)+d)'*L_test - 1/2*c'*(Q\c) + const; 
