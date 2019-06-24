@@ -4,4 +4,4 @@ approxMPCTrain.m file trains the Primal and Dual policies. This must be run to g
 approxMPCTest.m file then loads the trained policies and data and runs test on new samples.
 If test statistics are deemed unsatisfactory, please go back to training code and retrain
 # Requirements
-Multiparametric toolbox with explicit MPC solver. YALMIP. Gurobi.
+Multiparametric toolbox with explicit MPC solver. YALMIP. Gurobi. MATLAB 2016b or newer with Neural Network Toolbox.
